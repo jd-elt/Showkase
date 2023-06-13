@@ -3,7 +3,9 @@ package com.airbnb.android.showkase.processor.writer
 import androidx.room.compiler.processing.XFiler
 import androidx.room.compiler.processing.XProcessingEnv
 import androidx.room.compiler.processing.addOriginatingElement
+import androidx.room.compiler.processing.isMethod
 import androidx.room.compiler.processing.writeTo
+import com.airbnb.android.showkase.processor.ShowkaseProcessor
 import com.airbnb.android.showkase.processor.exceptions.ShowkaseProcessorException
 import com.airbnb.android.showkase.processor.models.ShowkaseMetadata
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -130,11 +132,25 @@ internal fun CodeBlock.Builder.addShowkaseBrowserComponent(
         showkaseMetadata.showkaseKDoc,
         componentKey,
     )
+
     add("\nisDefaultStyle = ${showkaseMetadata.isDefaultStyle},")
     showkaseMetadata.apply {
         showkaseWidthDp?.let { add("\nwidthDp = %L,", it) }
         showkaseHeightDp?.let { add("\nheightDp = %L,", it) }
         showkaseStyleName?.let { add("\nstyleName = %S,", it) }
+    }
+
+    val previewAnnotationClassName = com.squareup.javapoet.ClassName.bestGuess(
+        ShowkaseProcessor.PREVIEW_CLASS_NAME
+    )
+    if (showkaseMetadata.element.isMethod()
+        && showkaseMetadata.element.hasAnnotation(previewAnnotationClassName)) {
+        val annotation = showkaseMetadata.element.getAnnotation(previewAnnotationClassName)
+        add("\npreviewShowSystemUi = %S,", annotation?.getAsBoolean("showSystemUi").toString())
+        add("\npreviewShowBackground = %S,", annotation?.getAsBoolean("showBackground").toString())
+        add("\npreviewDevice = %S,", annotation?.getAsString("device").toString())
+    } else {
+        this
     }
     addStringList("tags", showkaseMetadata.tags)
     addStringList("extraMetadata", showkaseMetadata.extraMetadata)
