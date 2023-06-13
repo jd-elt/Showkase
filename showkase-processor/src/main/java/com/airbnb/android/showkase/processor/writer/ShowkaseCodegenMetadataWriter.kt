@@ -8,8 +8,10 @@ import androidx.room.compiler.processing.isMethod
 import androidx.room.compiler.processing.writeTo
 import com.airbnb.android.showkase.annotation.ShowkaseCodegenMetadata
 import com.airbnb.android.showkase.processor.ShowkaseProcessor.Companion.CODEGEN_PACKAGE_NAME
+import com.airbnb.android.showkase.processor.ShowkaseProcessor.Companion.PREVIEW_CLASS_NAME
 import com.airbnb.android.showkase.processor.models.ShowkaseMetadata
 import com.airbnb.android.showkase.processor.models.ShowkaseMetadataType
+import com.squareup.javapoet.ClassName
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -89,8 +91,13 @@ internal class ShowkaseCodegenMetadataWriter(private val environment: XProcessin
                 generatePropertyNameFromMetadata(showkaseMetadata)
             )
             .run {
-                if (showkaseMetadata.element.isMethod()) {
-                    addMember("jvmClassName = %S", (showkaseMetadata.element as XMethodElement).enclosingElement.className.canonicalName())
+                val previewAnnotationClassName = ClassName.bestGuess(PREVIEW_CLASS_NAME)
+                if (showkaseMetadata.element.isMethod()
+                    && showkaseMetadata.element.hasAnnotation(previewAnnotationClassName)) {
+                    val annotation = showkaseMetadata.element.getAnnotation(previewAnnotationClassName)
+                    addMember("previewShowSystemUi = %S", annotation?.getAsBoolean("showSystemUi").toString())
+                    addMember("previewShowBackground = %S", annotation?.getAsBoolean("showBackground").toString())
+                    addMember("previewDevice = %S", annotation?.getAsString("device").toString())
                 } else {
                     this
                 }

@@ -42,5 +42,8 @@ annotation class ShowkaseCodegenMetadata(
     val generatedPropertyName: String = "",
     val tags: Array<String> = [],
     val extraMetadata: Array<String> = [],
-    val jvmClassName: String = "",
+    val previewShowSystemUi: Boolean = false,
+    val previewShowBackground: Boolean = false,
+    val previewDevice: String = "",
+
 )
