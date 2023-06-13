@@ -1,8 +1,10 @@
 package com.airbnb.android.showkase.processor.writer
 
 import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
 import androidx.room.compiler.processing.XProcessingEnv
 import androidx.room.compiler.processing.addOriginatingElement
+import androidx.room.compiler.processing.isMethod
 import androidx.room.compiler.processing.writeTo
 import com.airbnb.android.showkase.annotation.ShowkaseCodegenMetadata
 import com.airbnb.android.showkase.processor.ShowkaseProcessor.Companion.CODEGEN_PACKAGE_NAME
@@ -71,8 +73,9 @@ internal class ShowkaseCodegenMetadataWriter(private val environment: XProcessin
         fileBuilder.build().writeTo(environment.filer, mode = XFiler.Mode.Aggregating)
     }
 
-    private fun createShowkaseCodegenMetadata(showkaseMetadata: ShowkaseMetadata): AnnotationSpec.Builder =
-        AnnotationSpec.builder(ShowkaseCodegenMetadata::class)
+    private fun createShowkaseCodegenMetadata(showkaseMetadata: ShowkaseMetadata): AnnotationSpec.Builder {
+        println(showkaseMetadata)
+        return AnnotationSpec.builder(ShowkaseCodegenMetadata::class)
             .addMember("showkaseName = %S", showkaseMetadata.showkaseName)
             .addMember("showkaseGroup = %S", showkaseMetadata.showkaseGroup)
             .addMember("packageName = %S", showkaseMetadata.packageName)
@@ -81,7 +84,18 @@ internal class ShowkaseCodegenMetadataWriter(private val environment: XProcessin
             .addMember("insideObject = ${showkaseMetadata.insideObject}")
             .addMember("insideWrapperClass = ${showkaseMetadata.insideWrapperClass}")
             .addMember("showkaseKDoc = %S", showkaseMetadata.showkaseKDoc)
-            .addMember("generatedPropertyName = %S", generatePropertyNameFromMetadata(showkaseMetadata))
+            .addMember(
+                "generatedPropertyName = %S",
+                generatePropertyNameFromMetadata(showkaseMetadata)
+            )
+            .run {
+                if (showkaseMetadata.element.isMethod()) {
+                    addMember("jvmClassName = %S", (showkaseMetadata.element as XMethodElement).enclosingElement.className.canonicalName())
+                } else {
+                    this
+                }
+            }
+    }
 
 
     private fun addMetadataTypeSpecificProperties(
