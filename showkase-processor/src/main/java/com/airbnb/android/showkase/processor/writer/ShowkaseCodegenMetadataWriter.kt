@@ -95,8 +95,8 @@ internal class ShowkaseCodegenMetadataWriter(private val environment: XProcessin
                 if (showkaseMetadata.element.isMethod()
                     && showkaseMetadata.element.hasAnnotation(previewAnnotationClassName)) {
                     val annotation = showkaseMetadata.element.getAnnotation(previewAnnotationClassName)
-                    addMember("previewShowSystemUi = %S", annotation?.getAsBoolean("showSystemUi").toString())
-                    addMember("previewShowBackground = %S", annotation?.getAsBoolean("showBackground").toString())
+                    addMember("previewShowSystemUi = ${annotation?.getAsBoolean("showSystemUi")}")
+                    addMember("previewShowBackground = ${annotation?.getAsBoolean("showBackground")}")
                     addMember("previewDevice = %S", annotation?.getAsString("device").toString())
                 } else {
                     this
