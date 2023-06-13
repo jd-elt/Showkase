@@ -146,8 +146,8 @@ internal fun CodeBlock.Builder.addShowkaseBrowserComponent(
     if (showkaseMetadata.element.isMethod()
         && showkaseMetadata.element.hasAnnotation(previewAnnotationClassName)) {
         val annotation = showkaseMetadata.element.getAnnotation(previewAnnotationClassName)
-        add("\npreviewShowSystemUi = ${annotation?.getAsBoolean("showSystemUi")}")
-        add("\npreviewShowBackground = ${annotation?.getAsBoolean("showBackground")}")
+        add("\npreviewShowSystemUi = ${annotation?.getAsBoolean("showSystemUi")},")
+        add("\npreviewShowBackground = ${annotation?.getAsBoolean("showBackground")},")
         add("\npreviewDevice = %S,", annotation?.getAsString("device").toString())
     } else {
         this
